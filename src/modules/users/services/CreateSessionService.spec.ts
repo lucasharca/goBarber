@@ -1,21 +1,30 @@
+import AppError from '@shared/errors/AppError';
+
 import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '../providers/HashProvider/fakes/fakeHashProvider';
 import CreateSessionService from './CreateSessionService';
 import CreateUserService from './CreateUserService';
 
-describe('AuthenticateUser', () => {
-  it('should be able to authenticate users', async () => {
-    const fakeUsersRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-    const createUserService = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
-    const createSessionService = new CreateSessionService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
+let fakeUsersRepository: FakeUsersRepository;
+let fakeHashProvider: FakeHashProvider;
+let createUserService: CreateUserService;
+let createSessionService: CreateSessionService;
 
+describe('AuthenticateUser', () => {
+  beforeEach(() => {
+    fakeUsersRepository = new FakeUsersRepository();
+    fakeHashProvider = new FakeHashProvider();
+    createUserService = new CreateUserService(
+      fakeUsersRepository,
+      fakeHashProvider,
+    );
+    createSessionService = new CreateSessionService(
+      fakeUsersRepository,
+      fakeHashProvider,
+    );
+  });
+
+  it('should be able to authenticate users', async () => {
     await createUserService.execute({
       name: 'John Doe',
       email: 'johndoe@gmail.com',
@@ -31,45 +40,26 @@ describe('AuthenticateUser', () => {
   });
 
   it('should not be able to authenthicate with non existing user', async () => {
-    const fakeUsersRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-
-    const createSessionService = new CreateSessionService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
-
-    expect(
+    await expect(
       createSessionService.execute({
         email: 'johndoe@gmail.com',
         password: '123456',
       }),
-    ).rejects.toThrowError();
+    ).rejects.toBeInstanceOf(AppError);
   });
 
   it('should not be able to login with wrong credentials', async () => {
-    const fakeUsersRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-    const createUserService = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
-    const createSessionService = new CreateSessionService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
-
     await createUserService.execute({
       name: 'John Doe',
       email: 'johndoe@gmail.com',
       password: '123456',
     });
 
-    expect(
+    await expect(
       createSessionService.execute({
         email: 'johndoe@gmail.com',
         password: 'wrong-password',
       }),
-    ).rejects.toThrowError();
+    ).rejects.toBeInstanceOf(AppError);
   });
 });

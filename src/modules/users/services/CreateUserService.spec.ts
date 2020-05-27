@@ -1,16 +1,24 @@
+import AppError from '@shared/errors/AppError';
+
 import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
 import FakeHashProvider from '../providers/HashProvider/fakes/fakeHashProvider';
 import CreateUserService from './CreateUserService';
 
+let fakeAppoitnemntsRepository: FakeUsersRepository;
+let fakeHashProvider: FakeHashProvider;
+let createUser: CreateUserService;
+
 describe('CreateUser', () => {
-  it('should be able to create a new user', async () => {
-    const fakeAppoitnemntsRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-    const createUser = new CreateUserService(
+  beforeEach(() => {
+    fakeAppoitnemntsRepository = new FakeUsersRepository();
+    fakeHashProvider = new FakeHashProvider();
+    createUser = new CreateUserService(
       fakeAppoitnemntsRepository,
       fakeHashProvider,
     );
+  });
 
+  it('should be able to create a new user', async () => {
     const user = await createUser.execute({
       name: 'John Doe',
       email: 'johndoe@gmail.com',
@@ -21,25 +29,18 @@ describe('CreateUser', () => {
   });
 
   it('it should not be able to create a user with existing email', async () => {
-    const fakeAppoitnemntsRepository = new FakeUsersRepository();
-    const fakeHashProvider = new FakeHashProvider();
-    const createUser = new CreateUserService(
-      fakeAppoitnemntsRepository,
-      fakeHashProvider,
-    );
-
     await createUser.execute({
       name: 'John Doe',
       email: 'johndoe@gmail.com',
       password: '123456',
     });
 
-    expect(
+    await expect(
       createUser.execute({
         name: 'John Doe',
         email: 'johndoe@gmail.com',
         password: '123456',
       }),
-    ).rejects.toThrowError();
+    ).rejects.toBeInstanceOf(AppError);
   });
 });
