@@ -3,6 +3,7 @@ import { getRepository, Repository, Not } from 'typeorm';
 import IUserRepository from '@modules/users/repositories/IUserRepository';
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
 import IFindAllProvidersDTO from '@modules/users/dtos/IFindAllProvidersDTO';
+import { classToClass } from 'class-transformer';
 
 import User from '../entities/Users';
 
